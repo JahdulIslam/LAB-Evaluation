@@ -4,11 +4,11 @@
 typedef struct Node
 {
     int data;
-    struct Node *left;
-    struct Node *right;
+    struct Node* left;
+    struct Node* right;
 } Node;
 
-Node *createNode(int val)
+Node* createNode(int val)
 {
     Node *newNode = malloc(sizeof(Node));
 
@@ -21,24 +21,22 @@ Node *createNode(int val)
     newNode->data = val;
     newNode->left = NULL;
     newNode->right = NULL;
-
     return newNode;
 }
 
-void insert(Node **root, int val)
+void insert(Node** root, int val)
 {
-    Node *newNode = createNode(val);
+    Node* newNode = createNode(val);
 
     if (*root == NULL)
     {
         *root = newNode;
-        return; 
+        return;
     }
 
-    Node *temp;
-    Node *queue[100];
+    Node* temp;
+    Node* queue[100];
     int front = -1, rear = -1;
-
     queue[++rear] = *root;
 
     while (front != rear)
@@ -67,12 +65,11 @@ void insert(Node **root, int val)
     }
 }
 
-Node *getDeepestRightMost(Node *root)
+Node* getDeepestRightMostNode(Node* root)
 {
     Node *temp;
     Node *queue[100];
     int front = -1, rear = -1;
-
     queue[++rear] = root;
 
     while (front != rear)
@@ -89,38 +86,138 @@ Node *getDeepestRightMost(Node *root)
             queue[++rear] = temp->right;
         }
     }
-
     return temp;
 }
 
-Node *search(Node *root, int val)
+void deleteDeepestRightMostNode(Node* root, Node* dNode)
 {
-    Node *temp;
-    Node *queue[100];
+    Node* temp;
+    Node* queue[100];
     int front = -1, rear = -1;
-
     queue[++rear] = root;
 
     while (front != rear)
     {
         temp = queue[++front];
 
-        if (temp->data = val)
+        if (temp == dNode)
         {
-            return temp;
+            temp == NULL;
+            free(dNode);
+            return;
         }
-        
+
+        if (temp->left == dNode)
+        {
+            temp->left = NULL;
+            free(dNode);
+            return;
+        }
+        else
+        {
+            queue[++rear] = temp->left;
+        }
+
+        if (temp->right == dNode)
+        {
+            temp->right = NULL;
+            free(dNode);
+            return;
+        }
+        else
+        {
+            queue[++rear] = temp->right;
+        }
+    }
+}
+
+void delete(Node** root, int val)
+{
+    if(*root == NULL)
+    {
+        printf("Tree is empty\n");
+        return;
+    }
+
+    if((*root)->left == NULL && (*root)->right == NULL)
+    {
+        if((*root)->data == val)
+        {
+            free(*root);
+            *root = NULL;
+            return;
+        }
+        else
+        {
+            printf("Node not found\n");
+            return;
+        }
+    }
+
+    Node* temp;
+    Node* queue[100];
+    int front = -1, rear = -1;
+    queue[++rear] = *root;
+    Node* keyNode = NULL;
+
+    while (front != rear)
+    {
+        temp = queue[++front];
+
+        if (temp->data == val)
+        {
+            keyNode = temp;
+        }
+
         if (temp->left != NULL)
         {
             queue[++rear] = temp->left;
         }
-        
+
         if (temp->right != NULL)
         {
             queue[++rear] = temp->right;
         }
     }
 
+    if (keyNode != NULL)
+    {
+        Node* deepest = getDeepestRightMostNode(*root);
+        keyNode->data = deepest->data;
+        deleteDeepestRightMostNode(*root, deepest);
+    }
+    else
+    {
+        printf("Node not found\n");
+    }
+}
+
+Node* search(Node* root, int val)
+{
+    Node *temp;
+    Node *queue[100];
+    int front = -1, rear = -1;
+    queue[++rear] = root;
+
+    while (front != rear)
+    {
+        temp = queue[++front];
+
+        if (temp->data == val)
+        {
+            return temp;
+        }
+
+        if (temp->left != NULL)
+        {
+            queue[++rear] = temp->left;
+        }
+
+        if (temp->right != NULL)
+        {
+            queue[++rear] = temp->right;
+        }
+    }
     return NULL;
 }
 
@@ -153,16 +250,17 @@ void postorder(Node *root)
         printf("%d ", root->data);
     }
 }
+
 int main()
 {
-    Node *root = NULL;
-    insert(&root, 20);
-    insert(&root, 30);
-    insert(&root, 40);
-    insert(&root, 50);
-    insert(&root, 60);
-    insert(&root, 70);
-    insert(&root, 80);
+    Node* root = NULL;
+    insert(&root, 8);
+    insert(&root, 3);
+    insert(&root, 10);
+    insert(&root, 1);
+    insert(&root, 6);
+    insert(&root, 9);
+    insert(&root, 14);
 
     printf("Inorder traversal: ");
     inorder(root);
@@ -174,7 +272,7 @@ int main()
     postorder(root);
     printf("\n");
 
-    int target = 90;
+    int target = 14;
     Node *searchResult = search(root, target);
 
     if (searchResult != NULL)
@@ -186,8 +284,10 @@ int main()
         printf("Node %d not found in the BST\n", target);
     }
 
-    Node *RightMostNode = getDeepestRightMost(root);
-    printf("%d is the right-most node\n", RightMostNode->data);
-
-    return 0;                        
+    delete(&root, 10);
+    printf("Inorder traversal: ");
+    inorder(root);
+    printf("\n");
+    
+    return 0;
 }
